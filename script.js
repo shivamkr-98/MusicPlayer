@@ -1,5 +1,6 @@
-const API_URL = 'https://synaxbots.shop/Spotify/index.php';
+const API_URL = 'https://synaxbots.shop/Spotify/index.php'; // Your API endpoint
 
+// Fetch music data from the API
 async function fetchMusic() {
     const query = document.getElementById('search').value;
     if (!query) {
@@ -9,9 +10,14 @@ async function fetchMusic() {
 
     try {
         const response = await fetch(`${API_URL}?query=${encodeURIComponent(query)}`);
+        if (!response.ok) {
+            throw new Error('Failed to fetch data');
+        }
+
         const data = await response.json();
-        
-        if (data && data.results) {
+        console.log('API Response:', data); // Debugging: Inspect API response
+
+        if (data && data.results && data.results.length > 0) {
             displayMusic(data.results);
         } else {
             alert('No songs found!');
@@ -22,11 +28,18 @@ async function fetchMusic() {
     }
 }
 
+// Display the list of songs in the UI
 function displayMusic(songs) {
     const musicList = document.getElementById('music-list');
     musicList.innerHTML = ''; // Clear previous results
 
     songs.forEach(song => {
+        // Check if a valid preview URL exists
+        if (!song.preview_url) {
+            console.warn('Missing preview_url for song:', song);
+            return;
+        }
+
         const trackDiv = document.createElement('div');
         trackDiv.className = 'track';
 
@@ -43,6 +56,7 @@ function displayMusic(songs) {
     });
 }
 
+// Play the selected song
 function playMusic(url) {
     const audioPlayer = document.getElementById('audio-player');
     audioPlayer.src = url;
